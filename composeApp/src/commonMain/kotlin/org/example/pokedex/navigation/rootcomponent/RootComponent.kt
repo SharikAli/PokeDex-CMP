@@ -4,12 +4,16 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
+import org.example.pokedex.domain.repository.PokemonRepository
 import org.example.pokedex.presentation.detail.DetailComponent
 import org.example.pokedex.presentation.favourite.FavouriteComponent
 import org.example.pokedex.presentation.home.HomeComponent
 import org.example.pokedex.presentation.pokedex.PokeDexComponent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
@@ -25,9 +29,11 @@ interface RootComponent {
 
 class DefaultRootComponent(
     componentContext: ComponentContext
-) : RootComponent, ComponentContext by componentContext {
+) : RootComponent, KoinComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
+
+    private val pokemonRepository by inject<PokemonRepository>()
 
     override val childStack: Value<ChildStack<Config, RootComponent.Child>> = childStack(
         source = navigation,
@@ -50,11 +56,26 @@ class DefaultRootComponent(
     }
 
     private fun createHome(context: ComponentContext): RootComponent.Child.HomeScreen {
-        return RootComponent.Child.HomeScreen(component = HomeComponent(context))
+        return RootComponent.Child.HomeScreen(
+            component = HomeComponent(
+                componentContext = context,
+                onNavigateToPokeDex = {
+                    navigation.pushNew(Config.PokeDex)
+                }
+            )
+        )
     }
 
     private fun createPokeDex(context: ComponentContext): RootComponent.Child.PokeDexScreen {
-        return RootComponent.Child.PokeDexScreen(component = PokeDexComponent(context))
+        return RootComponent.Child.PokeDexScreen(
+            component = PokeDexComponent(
+                componentContext = context,
+                pokemonRepository = pokemonRepository,
+                onPokemonDetail = {
+                    navigation.pushNew(Config.Detail(username = "sharikali"))
+                }
+            )
+        )
     }
 
     private fun createDetail(context: ComponentContext): RootComponent.Child.DetailScreen {

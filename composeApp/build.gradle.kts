@@ -39,7 +39,6 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation(libs.decompose)
             implementation(libs.android.sqlDelight.driver)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
@@ -56,8 +55,9 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
             // Decompose
-            implementation(libs.decompose)
-            implementation(libs.decompose.compose.extension)
+            api(libs.decompose)
+            api(libs.decompose.compose.extension)
+            api(libs.essenty.lifecycle.coroutines)
 
             // Kotlinx-Serialization
             implementation(libs.kotlinx.serialization.json)
@@ -79,6 +79,10 @@ kotlin {
 //            implementation(libs.ktor.client.serialization.kotlinx.json)
 //            implementation(libs.ktor.client.logging)
             implementation(libs.bundles.ktor.client)
+
+            // SqlDelight
+            implementation(libs.sqlDelight.coroutines.extensions)
+            implementation(libs.sqlDelight.primitive.adapters)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -22,6 +22,7 @@ datastore = "1.1.1"
 sqlDelight = "2.0.2"
 koin = "4.0.0"
 ktor = "3.2.2"
+essenty-lifecycle = "2.5.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -42,6 +43,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # Decompose Navigation
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose-compose-extension = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+essenty-lifecycle-coroutines = { module = "com.arkivanov.essenty:lifecycle-coroutines", version.ref = "essenty-lifecycle" }
 
 # Datastore
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
@@ -50,6 +52,8 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 android-sqlDelight-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 native-sqlDelight-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
 sqlite-sqlDelight-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
+sqlDelight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
+sqlDelight-primitive-adapters = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqlDelight" }
 
 # koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

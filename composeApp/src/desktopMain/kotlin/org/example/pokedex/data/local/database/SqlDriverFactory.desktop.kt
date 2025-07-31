@@ -12,8 +12,8 @@ actual fun Scope.sqlDriverFactory(): SqlDriver {
     val supportDir = getAppDirectory()
     supportDir.mkdirs()
     val databasePath = File(supportDir, "${DatabaseConstant.DATABASE_NAME}.db")
-    println("SqlDriver Database path: ${databasePath.path}")
-    println("SqlDriver Database absolutePath: ${databasePath.absolutePath}")
+    //<user.home>/Library/Application Support/PokeDex/PokeDexDatabase.db
+
     val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.path}")
     PokedexDatabase.Schema.create(driver)
     return driver

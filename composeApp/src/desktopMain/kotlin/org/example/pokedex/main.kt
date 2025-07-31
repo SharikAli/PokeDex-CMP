@@ -6,11 +6,13 @@ import androidx.compose.ui.window.rememberWindowState
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import org.example.decompose_demo.runOnUiThread
+import org.example.pokedex.common.runOnUiThread
+import org.example.pokedex.di.initKoin
 import org.example.pokedex.navigation.rootcomponent.DefaultRootComponent
 import org.example.pokedex.navigation.rootcomponent.RootComponent
 
 fun main() {
+    initKoin()
     // Always create the root component outside Compose on the UI thread
     val lifecycle = LifecycleRegistry()
 

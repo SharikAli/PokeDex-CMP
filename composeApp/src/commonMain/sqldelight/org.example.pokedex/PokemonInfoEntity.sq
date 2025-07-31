@@ -1,12 +1,17 @@
+import kotlin.collections.List;
+import org.example.pokedex.data.dto.PokemonInfo;
+import org.example.pokedex.data.dto.TypeResponse;
+
 CREATE TABLE IF NOT EXISTS pokemonInfoEntity (
   id INTEGER NOT NULL PRIMARY KEY,
   name TEXT NOT NULL,
   height INTEGER NOT NULL,
   weight INTEGER NOT NULL,
   experience INTEGER NOT NULL,
-  types TEXT NOT NULL,
-  stats TEXT NOT NULL,
-  isFavorite INTEGER DEFAULT 0 NOT NULL
+  types TEXT AS List<TypeResponse> NOT NULL,
+  stats TEXT AS List<PokemonInfo.StatsResponse> NOT NULL,
+  isFavorite INTEGER DEFAULT 0 NOT NULL,
+  sprites TEXT NOT NULL
 );
 
 selectOneByName:
@@ -20,7 +25,7 @@ FROM pokemonInfoEntity
 WHERE isFavorite != 0;
 
 insert:
-INSERT OR REPLACE INTO pokemonInfoEntity(id, name, height, weight, experience, types, stats, isFavorite)
+INSERT OR REPLACE INTO pokemonInfoEntity(id, name, height, weight, experience, types, stats, isFavorite, sprites)
 VALUES ?;
 
 updateIsFavorite:

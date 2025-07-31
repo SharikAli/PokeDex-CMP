@@ -1,22 +1,25 @@
 package org.example.pokedex.presentation.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import org.example.pokedex.domain.repository.PokemonDataSource
-import org.koin.compose.koinInject
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 
 @Composable
 fun HomeScreen(component: HomeComponent) {
-    val pokemonDataSource = koinInject<PokemonDataSource>()
 
-    LaunchedEffect(Unit) {
-        pokemonDataSource.getPokemonList(0,0)
-    }
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text("Home Screen")
-        Text("Home Screen")
-        Text("Home Screen")
+        Button(onClick = { component.navigate() }) {
+            Text("Navigate to PokeDex")
+        }
     }
 }
