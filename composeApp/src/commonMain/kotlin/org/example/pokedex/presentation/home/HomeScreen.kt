@@ -1,25 +1,17 @@
 package org.example.pokedex.presentation.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import org.example.pokedex.presentation.home.components.HomeContent
 
 @Composable
 fun HomeScreen(component: HomeComponent) {
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Home Screen")
-        Button(onClick = { component.navigate() }) {
-            Text("Navigate to PokeDex")
-        }
-    }
+    val state by component.state.subscribeAsState()
+
+    HomeContent(
+        state = state,
+        onEvent = component::handleIntent
+    )
 }

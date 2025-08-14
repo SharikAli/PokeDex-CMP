@@ -4,27 +4,27 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.delay
 import org.example.pokedex.common.constant.ApiConstant
+import org.example.pokedex.common.constant.ApiConstant.PAGE_SIZE
 import org.example.pokedex.common.safeApiCall
+import org.example.pokedex.data.dto.GenerationInfo
 import org.example.pokedex.data.dto.PokemonInfo
 import org.example.pokedex.data.dto.PokemonResponse
 
-interface PokemonDataSource {
+interface PokemonApi {
     suspend fun getPokemonList(page: Long): PokemonResponse
     suspend fun getPokemonByName(name: String): PokemonInfo
+    suspend fun getPokemonEvolutionChain(id: Long): PokemonInfo
+    suspend fun getPokemonByGeneration(id: Long): GenerationInfo
 }
 
-class PokemonDataSourceImpl(
+class PokemonApiImpl(
     private val httpClient: HttpClient
-) : PokemonDataSource {
-
-    companion object {
-        private const val PAGE_SIZE = 20
-    }
+) : PokemonApi {
 
     override suspend fun getPokemonList(page: Long): PokemonResponse {
         delay(1000) // simulate network delay
         return safeApiCall {
-            httpClient.get(ApiConstant.Pokemon.route) {
+            httpClient.get(ApiConstant.POKEMON) {
                 url {
                     parameters.append("limit", PAGE_SIZE.toString())
                     parameters.append("offset", (page * PAGE_SIZE).toString())
@@ -36,7 +36,21 @@ class PokemonDataSourceImpl(
     override suspend fun getPokemonByName(name: String): PokemonInfo {
         delay(1000) // simulate network delay
         return safeApiCall {
-            httpClient.get(ApiConstant.Pokemon.byName(name))
+            httpClient.get("${ApiConstant.POKEMON}/$name")
+        }
+    }
+
+    override suspend fun getPokemonEvolutionChain(id: Long): PokemonInfo {
+        delay(1000)
+        return safeApiCall {
+            httpClient.get("${ApiConstant.POKEMON_EVOLUTION_CHAIN}/$id")
+        }
+    }
+
+    override suspend fun getPokemonByGeneration(id: Long): GenerationInfo {
+        delay(1000)
+        return safeApiCall {
+            httpClient.get("${ApiConstant.POKEMON_GENERATION}/$id")
         }
     }
 }

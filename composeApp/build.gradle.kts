@@ -51,6 +51,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
@@ -83,6 +84,10 @@ kotlin {
             // SqlDelight
             implementation(libs.sqlDelight.coroutines.extensions)
             implementation(libs.sqlDelight.primitive.adapters)
+
+            // Coil
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

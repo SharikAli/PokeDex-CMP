@@ -23,9 +23,9 @@ internal fun createHttpClient(): HttpClient {
             )
         }
         install(plugin = HttpTimeout) {
-            requestTimeoutMillis = 15_000
+            requestTimeoutMillis = 10_000
             connectTimeoutMillis = 10_000
-            socketTimeoutMillis = 15_000
+            socketTimeoutMillis = 10_000
         }
         install(Logging) {
             logger = Logger.SIMPLE

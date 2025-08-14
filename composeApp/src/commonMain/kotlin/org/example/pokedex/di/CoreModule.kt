@@ -4,9 +4,9 @@ import org.example.pokedex.data.local.database.createPokeDexDatabase
 import org.example.pokedex.data.local.database.datasource.LocalPokemonDataSource
 import org.example.pokedex.data.local.database.datasource.LocalPokemonDataSourceImpl
 import org.example.pokedex.data.local.database.sqlDriverFactory
-import org.example.pokedex.data.remote.datasource.PokemonDataSourceImpl
 import org.example.pokedex.data.remote.createHttpClient
-import org.example.pokedex.data.remote.datasource.PokemonDataSource
+import org.example.pokedex.data.remote.datasource.PokemonApi
+import org.example.pokedex.data.remote.datasource.PokemonApiImpl
 import org.example.pokedex.data.repository.DataStoreRepository
 import org.example.pokedex.data.repository.PokemonRepositoryImpl
 import org.example.pokedex.domain.repository.PokemonRepository
@@ -26,7 +26,7 @@ val networkModule = module {
     singleOf(::LocalPokemonDataSourceImpl) withOptions {
         bind<LocalPokemonDataSource>()
     }
-    singleOf(::PokemonDataSourceImpl) bind PokemonDataSource::class
+    singleOf(::PokemonApiImpl) bind PokemonApi::class
 }
 
 val databaseModule = module {

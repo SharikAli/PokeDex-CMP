@@ -4,12 +4,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
 import org.example.pokedex.domain.repository.PokemonRepository
 import org.example.pokedex.presentation.detail.DetailComponent
 import org.example.pokedex.presentation.favourite.FavouriteComponent
+import org.example.pokedex.presentation.generation.GenerationComponent
 import org.example.pokedex.presentation.home.HomeComponent
 import org.example.pokedex.presentation.pokedex.PokeDexComponent
 import org.koin.core.component.KoinComponent
@@ -23,6 +25,7 @@ interface RootComponent {
         class PokeDexScreen(val component: PokeDexComponent) : Child()
         class DetailScreen(val component: DetailComponent) : Child()
         class FavouriteScreen(val component: FavouriteComponent) : Child()
+        class GenerationScreen(val component: GenerationComponent) : Child()
     }
 
 }
@@ -52,6 +55,7 @@ class DefaultRootComponent(
             Config.Favourite -> createFavourite(componentContext)
             Config.Home -> createHome(componentContext)
             Config.PokeDex -> createPokeDex(componentContext)
+            is Config.Generation -> createGeneration(componentContext, config.id)
         }
     }
 
@@ -61,6 +65,9 @@ class DefaultRootComponent(
                 componentContext = context,
                 onNavigateToPokeDex = {
                     navigation.pushNew(Config.PokeDex)
+                },
+                onNavigateToGeneration = {
+                    navigation.pushNew(Config.Generation(it))
                 }
             )
         )
@@ -71,9 +78,10 @@ class DefaultRootComponent(
             component = PokeDexComponent(
                 componentContext = context,
                 pokemonRepository = pokemonRepository,
-                onPokemonDetail = {
-                    navigation.pushNew(Config.Detail(username = "sharikali"))
-                }
+                navigateToDetails = {
+                    navigation.pushNew(Config.Detail(username = ""))
+                },
+                onBack = { navigation.pop() }
             )
         )
     }
@@ -84,6 +92,18 @@ class DefaultRootComponent(
 
     private fun createFavourite(context: ComponentContext): RootComponent.Child.FavouriteScreen {
         return RootComponent.Child.FavouriteScreen(component = FavouriteComponent(context))
+    }
+
+    private fun createGeneration(context: ComponentContext, id: String): RootComponent.Child.GenerationScreen {
+        return RootComponent.Child.GenerationScreen(
+            component = GenerationComponent(
+                componentContext = context,
+                pokemonRepository = pokemonRepository,
+                id = id,
+                onBack = { navigation.pop() }
+            )
+
+        )
     }
 
     @Serializable
@@ -99,5 +119,8 @@ class DefaultRootComponent(
 
         @Serializable
         data object Favourite : Config
+
+        @Serializable
+        data class Generation(val id: String) : Config
     }
 }

@@ -1,54 +1,87 @@
 package org.example.pokedex.data.repository
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
 import org.example.pokedex.common.Result
-import org.example.pokedex.common.toPokemon
-import org.example.pokedex.common.toPokemonEntity
-import org.example.pokedex.common.toPokemonInfo
-import org.example.pokedex.common.toPokemonInfoEntity
-import org.example.pokedex.data.dto.Pokemon
-import org.example.pokedex.data.dto.PokemonInfo
-import org.example.pokedex.data.dto.PokemonResponse
+import org.example.pokedex.common.mapToPokemonEntity
+import org.example.pokedex.common.toGenerationEntity
+import org.example.pokedex.common.toGenerationInfo
+import org.example.pokedex.common.toSinglePokemon
+import org.example.pokedex.data.dto.GenerationInfo
 import org.example.pokedex.data.local.database.datasource.LocalPokemonDataSource
-import org.example.pokedex.data.remote.datasource.PokemonDataSource
+import org.example.pokedex.data.remote.datasource.PokemonApi
+import org.example.pokedex.domain.model.SinglePokemon
 import org.example.pokedex.domain.repository.PokemonRepository
-import orgexamplepokedex.PokemonInfoEntity
 
 class PokemonRepositoryImpl(
     private val localDataSource: LocalPokemonDataSource,
-    private val remoteDataSource: PokemonDataSource
+    private val remoteDataSource: PokemonApi
 ) : PokemonRepository {
 
-    override suspend fun getPokemonList(page: Long): Result<List<Pokemon>> {
-        return try {
-            val cachedPokemonList = localDataSource.selectAllByPage(page)
-            if (cachedPokemonList.isEmpty()) {
-                val response: PokemonResponse = remoteDataSource.getPokemonList(page = page)
-                response.results.forEach { pokemon ->
-                    localDataSource.insert(pokemon.toPokemonEntity())
-                }
-                Result.Success(localDataSource.selectAllByPage(page).map { it.toPokemon() })
-            } else {
-                Result.Success(cachedPokemonList.map { it.toPokemon() })
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.Error(e.message.toString())
-        }
-    }
+    override suspend fun getPokemonList(page: Long): Flow<Result<List<SinglePokemon>>> =
+        channelFlow {
+            send(Result.Loading)
 
-    override suspend fun getPokemonFlowByName(name: String): Result<PokemonInfo> {
-        try {
-            val cachedPokemon: PokemonInfoEntity? = localDataSource.selectByName(name = name)
-            if (cachedPokemon == null) {
-                val pokemonInfo = remoteDataSource.getPokemonByName(name = name)
-                localDataSource.insert(pokemonInfo.toPokemonInfoEntity())
-                return Result.Success(pokemonInfo)
-            } else {
-                return Result.Success(cachedPokemon.toPokemonInfo())
+            val cachedPokemonList = localDataSource.selectAllByPage(page)
+            if (cachedPokemonList.isNotEmpty()) {
+                delay(1000)
+                send(Result.Success(cachedPokemonList.map { it.toSinglePokemon() }))
+                return@channelFlow
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return Result.Error(e.message.toString())
+            try {
+                val response = remoteDataSource.getPokemonList(page)
+                val currentList = mutableListOf<SinglePokemon>()
+
+                response.results.forEach { pokemon ->
+                    launch(Dispatchers.IO) {
+                        try {
+                            val pokemonInfo = remoteDataSource.getPokemonByName(pokemon.name)
+                            localDataSource.insert(mapToPokemonEntity(pokemon, pokemonInfo, page))
+
+                            val updatedPokemon =
+                                localDataSource.selectByName(pokemon.name)?.toSinglePokemon()
+
+                            updatedPokemon?.let {
+                                currentList.add(it)
+                                send(Result.Success(currentList.toList()))
+                            }
+                        } catch (e: Exception) {
+                            send(Result.Error(e.message.toString()))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                send(Result.Error(e.message.toString()))
+            }
         }
-    }
+
+    override suspend fun fetchPokemonListByGeneration(id: Long): Flow<Result<GenerationInfo>> =
+        channelFlow {
+            send(Result.Loading)
+
+            val cachedPokemonList = localDataSource.fetchPokemonListByGeneration(id)
+            if (cachedPokemonList != null) {
+                delay(1000)
+                send(Result.Success(cachedPokemonList.toGenerationInfo()))
+                return@channelFlow
+            }
+
+            try {
+                val response = remoteDataSource.getPokemonByGeneration(id)
+                localDataSource.insert(response.toGenerationEntity())
+
+                val cachePokemon = localDataSource.fetchPokemonListByGeneration(id)
+                cachePokemon?.let {
+                    send(Result.Success(cachePokemon.toGenerationInfo()))
+                }
+            } catch (e: Exception) {
+                send(Result.Error(e.message.toString()))
+            }
+
+        }
+
 }
