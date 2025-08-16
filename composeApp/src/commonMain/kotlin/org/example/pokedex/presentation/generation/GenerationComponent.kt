@@ -7,12 +7,12 @@ import com.arkivanov.decompose.value.update
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.example.pokedex.common.Result
-import org.example.pokedex.domain.repository.PokemonRepository
+import org.example.pokedex.domain.usecase.PokemonGenerationUseCase
 
 class GenerationComponent(
     componentContext: ComponentContext,
     val id: String,
-    private val pokemonRepository: PokemonRepository,
+    private val useCase: PokemonGenerationUseCase,
     private val onBack: () -> Unit,
 ) : ComponentContext by componentContext {
 
@@ -26,12 +26,13 @@ class GenerationComponent(
             is GenerationIntent.FetchPokemonByGeneration -> getPokemonList(intent.id)
             GenerationIntent.HideAlertDialog -> _state.update { it.copy(errorMessage = null) }
             GenerationIntent.NavigateBack -> onBack()
+            is GenerationIntent.SearchPokemon -> searchPokemon(intent.query)
         }
     }
 
     private fun getPokemonList(id: String) {
         scope.launch {
-            pokemonRepository.fetchPokemonListByGeneration(id.toLong()).collect { result ->
+            useCase(id.toLong()).collect { result ->
                 when (result) {
                     Result.Loading -> _state.update { it.copy(isLoading = true) }
                     is Result.Error -> _state.update {
@@ -49,6 +50,12 @@ class GenerationComponent(
                     }
                 }
             }
+        }
+    }
+
+    private fun searchPokemon(query: String) {
+        scope.launch {
+            _state.update { it.copy(searchText = query) }
         }
     }
 

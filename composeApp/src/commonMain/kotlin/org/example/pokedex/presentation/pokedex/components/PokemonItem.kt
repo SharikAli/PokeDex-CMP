@@ -29,8 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -78,18 +80,18 @@ fun PokemonItem(
             ) {
                 Column(
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxHeight().weight(1f)
+                    modifier = Modifier.fillMaxHeight().weight(1.3f)
                 ) {
+
                     Text(
                         text = pokemon.name.replaceFirstChar { it.uppercase() },
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = TextStyle(fontSize = 14.sp),
                         color = Color.White
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    // Type badges
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -124,7 +126,7 @@ fun PokemonItem(
                     Text(
                         text = pokemon.numberString,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.6f)
+                        color = Color.White.copy(alpha = 0.8f)
                     )
 
                     if (isLoading) {
@@ -147,15 +149,9 @@ fun PokemonItem(
                         model = request,
                         contentDescription = pokemon.name,
                         contentScale = ContentScale.Fit,
-                        onLoading = {
-                            isLoading = true
-                        },
-                        onSuccess = {
-                            isLoading = false
-                        },
-                        onError = {
-                            isLoading = false
-                        }
+                        onLoading = { isLoading = true },
+                        onSuccess = { isLoading = false },
+                        onError = { isLoading = false }
                     )
                 }
             }

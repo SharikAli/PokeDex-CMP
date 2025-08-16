@@ -1,11 +1,14 @@
 package org.example.pokedex.common
 
 import kotlinx.serialization.json.Json
+import org.example.pokedex.data.dto.EvolutionResponse
 import org.example.pokedex.data.dto.GenerationInfo
 import org.example.pokedex.data.dto.Pokemon
 import org.example.pokedex.data.dto.PokemonInfo
 import org.example.pokedex.data.dto.Sprites
+import org.example.pokedex.domain.model.Evolution
 import org.example.pokedex.domain.model.SinglePokemon
+import orgexamplepokedex.EvolutionEntity
 import orgexamplepokedex.GenerationEntity
 import orgexamplepokedex.PokemonEntity
 
@@ -69,18 +72,8 @@ fun GenerationInfo.toGenerationEntity() = GenerationEntity(
     pokemonList = Json.encodeToString(pokemonList)
 )
 
-fun Pokemon.toSinglePokemon(): SinglePokemon {
-    return SinglePokemon(
-        id = number.toLong(),
-        name = name,
-        page = page,
-        url = url,
-        height = 0,
-        weight = 0,
-        experience = 0,
-        isFavorite = false,
-        sprites = Sprites(null, null),
-        stats = emptyList(),
-        types = emptyList(),
-    )
-}
+fun EvolutionEntity.toEvolution() = Evolution(
+    id = id,
+    page = page,
+    chain = chain
+)

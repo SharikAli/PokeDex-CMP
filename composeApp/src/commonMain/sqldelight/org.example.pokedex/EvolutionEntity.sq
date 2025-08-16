@@ -1,0 +1,21 @@
+import org.example.pokedex.data.dto.ChainDto;
+
+CREATE TABLE IF NOT EXISTS evolutionEntity (
+ id INTEGER NOT NULL PRIMARY KEY,
+ page INTEGER NOT NULL DEFAULT 0,
+ chain TEXT AS ChainDto NOT NULL
+);
+
+insert:
+INSERT OR REPLACE INTO evolutionEntity(id, page, chain)
+VALUES (:id, :page, :chain);
+
+fetchPokemonEvolutionByPage:
+SELECT *
+FROM evolutionEntity
+WHERE page = :page;
+
+selectById:
+SELECT *
+FROM evolutionEntity
+WHERE id = :id;

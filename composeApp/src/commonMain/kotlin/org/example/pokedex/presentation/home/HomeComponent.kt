@@ -11,6 +11,7 @@ class HomeComponent(
     componentContext: ComponentContext,
     private val onNavigateToPokeDex: () -> Unit,
     private val onNavigateToGeneration: (String) -> Unit,
+    private val onNavigateToEvolution: () -> Unit,
 ) : ComponentContext by componentContext {
 
     private val scope = coroutineScope()
@@ -26,7 +27,7 @@ class HomeComponent(
                 onNavigateToGeneration(intent.id)
             }
 
-            HomeIntent.NavigateToEvolution -> TODO()
+            HomeIntent.NavigateToEvolution -> onNavigateToEvolution()
             HomeIntent.NavigateToLocation -> TODO()
             is HomeIntent.ShowGenerationSheet -> showGenerationSheet(intent.visible)
         }

@@ -8,9 +8,11 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
-import org.example.pokedex.domain.repository.PokemonRepository
+import org.example.pokedex.domain.usecase.EvolutionUseCase
+import org.example.pokedex.domain.usecase.PokemonGenerationUseCase
+import org.example.pokedex.domain.usecase.PokemonUseCase
 import org.example.pokedex.presentation.detail.DetailComponent
-import org.example.pokedex.presentation.favourite.FavouriteComponent
+import org.example.pokedex.presentation.evolution.EvolutionComponent
 import org.example.pokedex.presentation.generation.GenerationComponent
 import org.example.pokedex.presentation.home.HomeComponent
 import org.example.pokedex.presentation.pokedex.PokeDexComponent
@@ -24,8 +26,8 @@ interface RootComponent {
         class HomeScreen(val component: HomeComponent) : Child()
         class PokeDexScreen(val component: PokeDexComponent) : Child()
         class DetailScreen(val component: DetailComponent) : Child()
-        class FavouriteScreen(val component: FavouriteComponent) : Child()
         class GenerationScreen(val component: GenerationComponent) : Child()
+        class EvolutionScreen(val component: EvolutionComponent) : Child()
     }
 
 }
@@ -36,7 +38,9 @@ class DefaultRootComponent(
 
     private val navigation = StackNavigation<Config>()
 
-    private val pokemonRepository by inject<PokemonRepository>()
+    private val pokemonUseCase by inject<PokemonUseCase>()
+    private val generationUseCase by inject<PokemonGenerationUseCase>()
+    private val evolutionUseCase by inject<EvolutionUseCase>()
 
     override val childStack: Value<ChildStack<Config, RootComponent.Child>> = childStack(
         source = navigation,
@@ -52,7 +56,7 @@ class DefaultRootComponent(
     ): RootComponent.Child {
         return when (config) {
             is Config.Detail -> createDetail(componentContext)
-            Config.Favourite -> createFavourite(componentContext)
+            Config.Evolution -> createEvolution(componentContext)
             Config.Home -> createHome(componentContext)
             Config.PokeDex -> createPokeDex(componentContext)
             is Config.Generation -> createGeneration(componentContext, config.id)
@@ -63,12 +67,9 @@ class DefaultRootComponent(
         return RootComponent.Child.HomeScreen(
             component = HomeComponent(
                 componentContext = context,
-                onNavigateToPokeDex = {
-                    navigation.pushNew(Config.PokeDex)
-                },
-                onNavigateToGeneration = {
-                    navigation.pushNew(Config.Generation(it))
-                }
+                onNavigateToPokeDex = { navigation.pushNew(Config.PokeDex) },
+                onNavigateToGeneration = { navigation.pushNew(Config.Generation(it)) },
+                onNavigateToEvolution = { navigation.pushNew(Config.Evolution) }
             )
         )
     }
@@ -77,10 +78,8 @@ class DefaultRootComponent(
         return RootComponent.Child.PokeDexScreen(
             component = PokeDexComponent(
                 componentContext = context,
-                pokemonRepository = pokemonRepository,
-                navigateToDetails = {
-                    navigation.pushNew(Config.Detail(username = ""))
-                },
+                useCase = pokemonUseCase,
+                navigateToDetails = { navigation.pushNew(Config.Detail(username = "")) },
                 onBack = { navigation.pop() }
             )
         )
@@ -90,19 +89,27 @@ class DefaultRootComponent(
         return RootComponent.Child.DetailScreen(component = DetailComponent(context))
     }
 
-    private fun createFavourite(context: ComponentContext): RootComponent.Child.FavouriteScreen {
-        return RootComponent.Child.FavouriteScreen(component = FavouriteComponent(context))
+    private fun createEvolution(context: ComponentContext): RootComponent.Child.EvolutionScreen {
+        return RootComponent.Child.EvolutionScreen(
+            component = EvolutionComponent(
+                componentContext = context,
+                useCase = evolutionUseCase,
+                onBack = { navigation.pop() }
+            )
+        )
     }
 
-    private fun createGeneration(context: ComponentContext, id: String): RootComponent.Child.GenerationScreen {
+    private fun createGeneration(
+        context: ComponentContext,
+        id: String
+    ): RootComponent.Child.GenerationScreen {
         return RootComponent.Child.GenerationScreen(
             component = GenerationComponent(
                 componentContext = context,
-                pokemonRepository = pokemonRepository,
+                useCase = generationUseCase,
                 id = id,
                 onBack = { navigation.pop() }
             )
-
         )
     }
 
@@ -118,7 +125,7 @@ class DefaultRootComponent(
         data class Detail(val username: String) : Config
 
         @Serializable
-        data object Favourite : Config
+        data object Evolution : Config
 
         @Serializable
         data class Generation(val id: String) : Config

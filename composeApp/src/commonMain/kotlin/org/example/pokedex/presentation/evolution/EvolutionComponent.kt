@@ -1,4 +1,4 @@
-package org.example.pokedex.presentation.pokedex
+package org.example.pokedex.presentation.evolution
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -7,33 +7,31 @@ import com.arkivanov.decompose.value.update
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.example.pokedex.common.Result
-import org.example.pokedex.domain.usecase.PokemonUseCase
+import org.example.pokedex.domain.usecase.EvolutionUseCase
 
-class PokeDexComponent(
+class EvolutionComponent(
     componentContext: ComponentContext,
-    private val useCase: PokemonUseCase,
-    private val navigateToDetails: (String) -> Unit,
+    private val useCase: EvolutionUseCase,
     private val onBack: () -> Unit,
 ) : ComponentContext by componentContext {
 
     private val scope = coroutineScope()
 
-    private val _state: MutableValue<PokeDexState> = MutableValue(PokeDexState())
-    val state: Value<PokeDexState> = _state
+    private val _state: MutableValue<EvolutionState> = MutableValue(EvolutionState())
+    val state: Value<EvolutionState> = _state
 
-    fun handleIntent(intent: PokeDexIntent) {
+    fun handleIntent(intent: EvolutionIntent) {
         when (intent) {
-            is PokeDexIntent.FetchPokemonList -> getPokemonList(intent.page)
-            PokeDexIntent.LoadMoreItems -> loadMoreItems()
-            PokeDexIntent.NavigateBack -> onBack()
-            PokeDexIntent.HideAlertDialog -> _state.update { it.copy(errorMessage = null) }
-            is PokeDexIntent.NavigateToPokemonDetails -> navigateToDetails(intent.name)
+            is EvolutionIntent.FetchPokemonList -> getEvolutionList(intent.page)
+            EvolutionIntent.LoadMoreItems -> loadMoreItems()
+            EvolutionIntent.HideAlertDialog -> _state.update { it.copy(errorMessage = null) }
+            EvolutionIntent.NavigateBack -> onBack()
         }
     }
 
-    private fun getPokemonList(page: Long) {
+    private fun getEvolutionList(page: Long) {
         scope.launch {
-            useCase(page).collect { result ->
+            useCase.invoke(page).collect { result ->
                 when (result) {
                     Result.Loading -> _state.update { it.copy(isLoading = true) }
                     is Result.Error -> _state.update {
@@ -43,17 +41,12 @@ class PokeDexComponent(
                         )
                     }
 
-                    is Result.Success -> {
-                        _state.update { state ->
-                            val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.name }
-                                .sortedBy { it.numberString }
-                            state.copy(
-                                isLoading = false,
-                                pokemonList = combined,
-                                loadMoreItem = true,
-                            )
-                        }
+                    is Result.Success -> _state.update {
+                        it.copy(
+                            isLoading = false,
+                            evolutionList = result.data,
+                            loadMoreItem = true,
+                        )
                     }
                 }
             }
@@ -61,10 +54,10 @@ class PokeDexComponent(
     }
 
     private fun loadMoreItems() {
-        if (_state.value.pokemonList.isEmpty()) return
+        if (_state.value.evolutionList.isEmpty()) return
         scope.launch {
 
-            val nextPage = state.value.pokemonList.last().page + 1
+            val nextPage = state.value.evolutionList.last().page + 1
             useCase(nextPage).collect { result ->
                 when (result) {
                     Result.Loading -> _state.update { it.copy(isPaginating = true) }
@@ -77,12 +70,12 @@ class PokeDexComponent(
 
                     is Result.Success -> {
                         _state.update { state ->
-                            val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.name }
-                                .sortedBy { it.numberString }
+                            val combined = (state.evolutionList + result.data)
+                                .distinctBy { it.id }
+                                .sortedBy { it.id }
                             state.copy(
                                 isPaginating = false,
-                                pokemonList = combined,
+                                evolutionList = combined,
                                 loadMoreItem = result.data.isNotEmpty(),
                                 errorMessage = null
                             )
@@ -92,5 +85,4 @@ class PokeDexComponent(
             }
         }
     }
-
 }

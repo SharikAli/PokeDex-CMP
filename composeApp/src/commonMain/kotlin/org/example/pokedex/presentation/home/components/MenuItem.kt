@@ -41,7 +41,7 @@ fun MenuItem(
             modifier = Modifier
                 .fillMaxSize()
                 .background(menu.color)
-                .padding(20.dp)
+                .padding(12.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
