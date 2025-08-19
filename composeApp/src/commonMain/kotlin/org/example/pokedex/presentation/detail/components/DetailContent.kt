@@ -68,6 +68,8 @@ fun DetailContent(
                         modifier = Modifier.padding(20.dp),
                         pokemonInfo = state.pokemon
                     )
+
+                    BaseStats(pokemon = state.pokemon)
                 }
             } else {
                 Row(
@@ -88,6 +90,8 @@ fun DetailContent(
                             modifier = Modifier.padding(20.dp),
                             pokemonInfo = state.pokemon
                         )
+
+                        BaseStats(pokemon = state.pokemon)
                     }
 
                 }
