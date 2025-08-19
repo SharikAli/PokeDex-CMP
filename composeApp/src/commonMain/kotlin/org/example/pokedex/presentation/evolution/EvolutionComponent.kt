@@ -22,48 +22,25 @@ class EvolutionComponent(
 
     fun handleIntent(intent: EvolutionIntent) {
         when (intent) {
-            is EvolutionIntent.FetchPokemonList -> getEvolutionList(intent.page)
-            EvolutionIntent.LoadMoreItems -> loadMoreItems()
+            is EvolutionIntent.LoadPokemonItems -> loadMoreItems(intent.page)
             EvolutionIntent.HideAlertDialog -> _state.update { it.copy(errorMessage = null) }
             EvolutionIntent.NavigateBack -> onBack()
         }
     }
 
-    private fun getEvolutionList(page: Long) {
+    private fun loadMoreItems(page: Long) {
         scope.launch {
-            useCase.invoke(page).collect { result ->
+            var nextPage = 0L
+            if (!_state.value.isInitialPageLoading) {
+                nextPage = page.plus(1)
+            }
+
+            useCase(nextPage).collect { result ->
                 when (result) {
                     Result.Loading -> _state.update { it.copy(isLoading = true) }
                     is Result.Error -> _state.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.errorMessage
-                        )
-                    }
-
-                    is Result.Success -> _state.update {
-                        it.copy(
-                            isLoading = false,
-                            evolutionList = result.data,
-                            loadMoreItem = true,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun loadMoreItems() {
-        if (_state.value.evolutionList.isEmpty()) return
-        scope.launch {
-
-            val nextPage = state.value.evolutionList.last().page + 1
-            useCase(nextPage).collect { result ->
-                when (result) {
-                    Result.Loading -> _state.update { it.copy(isPaginating = true) }
-                    is Result.Error -> _state.update {
-                        it.copy(
-                            isPaginating = false,
                             errorMessage = result.errorMessage
                         )
                     }
@@ -74,10 +51,11 @@ class EvolutionComponent(
                                 .distinctBy { it.id }
                                 .sortedBy { it.id }
                             state.copy(
-                                isPaginating = false,
+                                isLoading = false,
                                 evolutionList = combined,
                                 loadMoreItem = result.data.isNotEmpty(),
-                                errorMessage = null
+                                errorMessage = null,
+                                isInitialPageLoading = false,
                             )
                         }
                     }
@@ -85,4 +63,5 @@ class EvolutionComponent(
             }
         }
     }
+
 }

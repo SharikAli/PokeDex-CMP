@@ -12,7 +12,7 @@ fun EvolutionScreen(component: EvolutionComponent) {
     val state by component.state.subscribeAsState()
 
     LaunchedEffect(Unit) {
-        component.handleIntent(EvolutionIntent.FetchPokemonList(0))
+        component.handleIntent(EvolutionIntent.LoadPokemonItems(0))
     }
 
     EvolutionContent(

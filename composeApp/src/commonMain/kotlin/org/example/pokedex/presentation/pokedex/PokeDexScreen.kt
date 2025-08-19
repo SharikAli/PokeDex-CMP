@@ -12,7 +12,7 @@ fun PokeDexScreen(component: PokeDexComponent) {
     val state by component.state.subscribeAsState()
 
     LaunchedEffect(Unit) {
-        component.handleIntent(PokeDexIntent.FetchPokemonList(0))
+        component.handleIntent(PokeDexIntent.LoadPokemonItems(0))
     }
 
     PokeDexContent(

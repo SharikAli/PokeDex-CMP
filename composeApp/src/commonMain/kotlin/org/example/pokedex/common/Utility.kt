@@ -43,7 +43,21 @@ fun shimmerBrush(
 }
 
 fun getPokemonBackgroundColor(pokemon: SinglePokemon): Brush {
-    val colorList = pokemon.types.map {
+    val colorList = getPokemonColorType(pokemon)
+
+    if (colorList.size < 2) {
+        colorList.add(colorList[0])
+    }
+    return Brush.linearGradient(colorList.map { it.color })
+}
+
+fun getPokemonColors(pokemon: SinglePokemon): List<Color> {
+    val colorList = getPokemonColorType(pokemon)
+    return colorList.map { it.color }
+}
+
+private fun getPokemonColorType(pokemon: SinglePokemon): MutableList<PokemonType> {
+    return pokemon.types.map {
         when (it.type.name) {
             PokemonType.NORMAL.toString().lowercase() -> PokemonType.NORMAL
             PokemonType.FIRE.toString().lowercase() -> PokemonType.FIRE
@@ -66,8 +80,4 @@ fun getPokemonBackgroundColor(pokemon: SinglePokemon): Brush {
             else -> PokemonType.NORMAL
         }
     } as MutableList<PokemonType>
-    if (colorList.size < 2) {
-        colorList.add(colorList[0])
-    }
-    return Brush.linearGradient(colorList.map { it.color })
 }

@@ -7,12 +7,13 @@ import com.arkivanov.decompose.value.update
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.example.pokedex.common.Result
+import org.example.pokedex.domain.model.SinglePokemon
 import org.example.pokedex.domain.usecase.PokemonUseCase
 
 class PokeDexComponent(
     componentContext: ComponentContext,
     private val useCase: PokemonUseCase,
-    private val navigateToDetails: (String) -> Unit,
+    private val navigateToDetails: (SinglePokemon) -> Unit,
     private val onBack: () -> Unit,
 ) : ComponentContext by componentContext {
 
@@ -23,17 +24,21 @@ class PokeDexComponent(
 
     fun handleIntent(intent: PokeDexIntent) {
         when (intent) {
-            is PokeDexIntent.FetchPokemonList -> getPokemonList(intent.page)
-            PokeDexIntent.LoadMoreItems -> loadMoreItems()
+            is PokeDexIntent.LoadPokemonItems -> loadMoreItems(intent.page)
             PokeDexIntent.NavigateBack -> onBack()
             PokeDexIntent.HideAlertDialog -> _state.update { it.copy(errorMessage = null) }
-            is PokeDexIntent.NavigateToPokemonDetails -> navigateToDetails(intent.name)
+            is PokeDexIntent.NavigateToPokemonDetails -> navigateToDetails(intent.pokemon)
         }
     }
 
-    private fun getPokemonList(page: Long) {
+    private fun loadMoreItems(page: Long) {
         scope.launch {
-            useCase(page).collect { result ->
+            var nextPage = 0L
+            if (!_state.value.isInitialPageLoading) {
+                nextPage = page.plus(1)
+            }
+
+            useCase(nextPage).collect { result ->
                 when (result) {
                     Result.Loading -> _state.update { it.copy(isLoading = true) }
                     is Result.Error -> _state.update {
@@ -46,45 +51,14 @@ class PokeDexComponent(
                     is Result.Success -> {
                         _state.update { state ->
                             val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.name }
-                                .sortedBy { it.numberString }
+                                .distinctBy { it.id }
+                                .sortedBy { it.id }
                             state.copy(
                                 isLoading = false,
                                 pokemonList = combined,
-                                loadMoreItem = true,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun loadMoreItems() {
-        if (_state.value.pokemonList.isEmpty()) return
-        scope.launch {
-
-            val nextPage = state.value.pokemonList.last().page + 1
-            useCase(nextPage).collect { result ->
-                when (result) {
-                    Result.Loading -> _state.update { it.copy(isPaginating = true) }
-                    is Result.Error -> _state.update {
-                        it.copy(
-                            isPaginating = false,
-                            errorMessage = result.errorMessage
-                        )
-                    }
-
-                    is Result.Success -> {
-                        _state.update { state ->
-                            val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.name }
-                                .sortedBy { it.numberString }
-                            state.copy(
-                                isPaginating = false,
-                                pokemonList = combined,
                                 loadMoreItem = result.data.isNotEmpty(),
-                                errorMessage = null
+                                errorMessage = null,
+                                isInitialPageLoading = false,
                             )
                         }
                     }

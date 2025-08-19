@@ -7,5 +7,5 @@ data class EvolutionState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val loadMoreItem: Boolean = false,
-    val isPaginating: Boolean = false,
+    val isInitialPageLoading: Boolean = true,
 )

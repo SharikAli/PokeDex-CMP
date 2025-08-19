@@ -1,9 +1,11 @@
 package org.example.pokedex.domain.model
 
+import kotlinx.serialization.Serializable
 import org.example.pokedex.data.dto.Sprites
 import org.example.pokedex.data.dto.StatsResponse
 import org.example.pokedex.data.dto.TypeResponse
 
+@Serializable
 data class SinglePokemon(
     var page: Long,
     val name: String,
