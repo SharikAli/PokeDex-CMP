@@ -1,0 +1,7 @@
+import org.example.pokedex.data.dto.ChainDto;
+
+CREATE TABLE evolutionEntity (
+ id INTEGER NOT NULL PRIMARY KEY,
+ page INTEGER NOT NULL DEFAULT 0,
+ chain TEXT AS ChainDto NOT NULL
+);

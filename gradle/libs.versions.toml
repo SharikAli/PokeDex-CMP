@@ -22,6 +22,8 @@ datastore = "1.1.1"
 sqlDelight = "2.0.2"
 koin = "4.0.0"
 ktor = "3.2.2"
+essenty-lifecycle = "2.5.0"
+coilNetworkKtor3 = "3.3.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -42,6 +44,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # Decompose Navigation
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose-compose-extension = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+essenty-lifecycle-coroutines = { module = "com.arkivanov.essenty:lifecycle-coroutines", version.ref = "essenty-lifecycle" }
 
 # Datastore
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
@@ -50,6 +53,8 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 android-sqlDelight-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 native-sqlDelight-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
 sqlite-sqlDelight-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
+sqlDelight-coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
+sqlDelight-primitive-adapters = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqlDelight" }
 
 # koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -65,6 +70,10 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+
+# Coil3
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilNetworkKtor3" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilNetworkKtor3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

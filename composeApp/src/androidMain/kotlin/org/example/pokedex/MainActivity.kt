@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         initKoin {
-//            androidLogger()
+            androidLogger()
             androidContext(this@MainActivity)
         }
 

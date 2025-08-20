@@ -1,15 +1,22 @@
 package org.example.pokedex.presentation.detail
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import org.example.pokedex.presentation.detail.components.DetailContent
 
 @Composable
 fun DetailScreen(component: DetailComponent) {
 
-    Column {
-        Text("Detail Screen")
-        Text("Detail Screen")
-        Text("Detail Screen")
+    val state by component.state.subscribeAsState()
+
+    LaunchedEffect(Unit) {
+        component.handleIntent(DetailIntent.LoadPokemon(0))
     }
+
+    DetailContent(
+        state = state,
+        onEvent = component::handleIntent
+    )
 }

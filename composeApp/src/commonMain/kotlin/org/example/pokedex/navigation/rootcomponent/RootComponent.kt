@@ -4,32 +4,36 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
-import kotlinx.serialization.Serializable
+import org.example.pokedex.domain.model.SinglePokemon
+import org.example.pokedex.domain.usecase.EvolutionUseCase
+import org.example.pokedex.domain.usecase.PokemonGenerationUseCase
+import org.example.pokedex.domain.usecase.PokemonUseCase
 import org.example.pokedex.presentation.detail.DetailComponent
-import org.example.pokedex.presentation.favourite.FavouriteComponent
+import org.example.pokedex.presentation.evolution.EvolutionComponent
+import org.example.pokedex.presentation.generation.GenerationComponent
 import org.example.pokedex.presentation.home.HomeComponent
 import org.example.pokedex.presentation.pokedex.PokeDexComponent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
-
-    sealed class Child {
-        class HomeScreen(val component: HomeComponent) : Child()
-        class PokeDexScreen(val component: PokeDexComponent) : Child()
-        class DetailScreen(val component: DetailComponent) : Child()
-        class FavouriteScreen(val component: FavouriteComponent) : Child()
-    }
-
 }
 
 class DefaultRootComponent(
     componentContext: ComponentContext
-) : RootComponent, ComponentContext by componentContext {
+) : RootComponent, KoinComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
 
-    override val childStack: Value<ChildStack<Config, RootComponent.Child>> = childStack(
+    private val pokemonUseCase by inject<PokemonUseCase>()
+    private val generationUseCase by inject<PokemonGenerationUseCase>()
+    private val evolutionUseCase by inject<EvolutionUseCase>()
+
+    override val childStack: Value<ChildStack<Config, Child>> = childStack(
         source = navigation,
         serializer = Config.serializer(),
         initialConfiguration = Config.Home,
@@ -40,43 +44,110 @@ class DefaultRootComponent(
     private fun createChild(
         config: Config,
         componentContext: ComponentContext
-    ): RootComponent.Child {
+    ): Child {
         return when (config) {
-            is Config.Detail -> createDetail(componentContext)
-            Config.Favourite -> createFavourite(componentContext)
+            is Config.Detail -> createDetail(
+                componentContext,
+                config.pokemon,
+                config.showLegendaryPokeDex,
+                config.showMegaEvolvePokeDex
+            )
+
+            is Config.PokeDex -> createPokeDex(
+                componentContext,
+                config.showLegendaryPokeDex,
+                config.showMegaEvolvePokeDex
+            )
+
+            is Config.Generation -> createGeneration(componentContext, config.id)
+            Config.Evolution -> createEvolution(componentContext)
             Config.Home -> createHome(componentContext)
-            Config.PokeDex -> createPokeDex(componentContext)
         }
     }
 
-    private fun createHome(context: ComponentContext): RootComponent.Child.HomeScreen {
-        return RootComponent.Child.HomeScreen(component = HomeComponent(context))
+    private fun createHome(context: ComponentContext): Child.HomeScreen {
+        return Child.HomeScreen(
+            component = HomeComponent(
+                componentContext = context,
+                onNavigateToPokeDex = { showLegendaryPokeDex, showMegaEvolvePokeDex ->
+                    navigation.pushNew(
+                        Config.PokeDex(
+                            showLegendaryPokeDex = showLegendaryPokeDex,
+                            showMegaEvolvePokeDex = showMegaEvolvePokeDex
+                        )
+                    )
+                },
+                onNavigateToGeneration = { navigation.pushNew(Config.Generation(it)) },
+                onNavigateToEvolution = { navigation.pushNew(Config.Evolution) }
+            )
+        )
     }
 
-    private fun createPokeDex(context: ComponentContext): RootComponent.Child.PokeDexScreen {
-        return RootComponent.Child.PokeDexScreen(component = PokeDexComponent(context))
+    private fun createPokeDex(
+        context: ComponentContext,
+        showLegendaryPokeDex: Boolean,
+        showMegaEvolvePokeDex: Boolean
+    ): Child.PokeDexScreen {
+        return Child.PokeDexScreen(
+            component = PokeDexComponent(
+                componentContext = context,
+                useCase = pokemonUseCase,
+                showLegendaryPokeDex = showLegendaryPokeDex,
+                showMegaEvolvePokeDex = showMegaEvolvePokeDex,
+                navigateToDetails = { pokemon, legendaryPokeDex, megaEvolvePokeDex ->
+                    navigation.pushNew(
+                        Config.Detail(
+                            pokemon,
+                            legendaryPokeDex,
+                            megaEvolvePokeDex
+                        )
+                    )
+                },
+                onBack = { navigation.pop() }
+            )
+        )
     }
 
-    private fun createDetail(context: ComponentContext): RootComponent.Child.DetailScreen {
-        return RootComponent.Child.DetailScreen(component = DetailComponent(context))
+    private fun createDetail(
+        context: ComponentContext,
+        pokemon: SinglePokemon,
+        showLegendaryPokeDex: Boolean,
+        showMegaEvolvePokeDex: Boolean
+    ): Child.DetailScreen {
+        return Child.DetailScreen(
+            component = DetailComponent(
+                componentContext = context,
+                pokemon = pokemon,
+                showLegendaryPokeDex = showLegendaryPokeDex,
+                showMegaEvolvePokeDex = showMegaEvolvePokeDex,
+                useCase = pokemonUseCase,
+                onBack = { navigation.pop() }
+            )
+        )
     }
 
-    private fun createFavourite(context: ComponentContext): RootComponent.Child.FavouriteScreen {
-        return RootComponent.Child.FavouriteScreen(component = FavouriteComponent(context))
+    private fun createEvolution(context: ComponentContext): Child.EvolutionScreen {
+        return Child.EvolutionScreen(
+            component = EvolutionComponent(
+                componentContext = context,
+                useCase = evolutionUseCase,
+                onBack = { navigation.pop() }
+            )
+        )
     }
 
-    @Serializable
-    sealed interface Config {
-        @Serializable
-        data object Home : Config
-
-        @Serializable
-        data object PokeDex : Config
-
-        @Serializable
-        data class Detail(val username: String) : Config
-
-        @Serializable
-        data object Favourite : Config
+    private fun createGeneration(
+        context: ComponentContext,
+        id: String
+    ): Child.GenerationScreen {
+        return Child.GenerationScreen(
+            component = GenerationComponent(
+                componentContext = context,
+                useCase = generationUseCase,
+                id = id,
+                onBack = { navigation.pop() }
+            )
+        )
     }
+
 }

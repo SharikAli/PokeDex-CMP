@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS generationEntity (
+ id INTEGER NOT NULL PRIMARY KEY,
+ name TEXT NOT NULL,
+ pokemonList TEXT NOT NULL
+);
+
+insert:
+INSERT OR REPLACE INTO generationEntity(id, name, pokemonList)
+VALUES ?;
+
+getByGeneration:
+SELECT *
+FROM generationEntity
+WHERE id = :id;
+

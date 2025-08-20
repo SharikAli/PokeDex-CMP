@@ -1,0 +1,17 @@
+import kotlin.collections.List;
+import org.example.pokedex.data.dto.StatsResponse;
+import org.example.pokedex.data.dto.TypeResponse;
+
+CREATE TABLE legendaryPokemonEntity (
+  id INTEGER NOT NULL PRIMARY KEY,
+  page INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  height INTEGER NOT NULL,
+  weight INTEGER NOT NULL,
+  experience INTEGER NOT NULL,
+  types TEXT AS List<TypeResponse> NOT NULL,
+  stats TEXT AS List<StatsResponse> NOT NULL,
+  isFavorite INTEGER DEFAULT 0 NOT NULL,
+  sprites TEXT NOT NULL
+);

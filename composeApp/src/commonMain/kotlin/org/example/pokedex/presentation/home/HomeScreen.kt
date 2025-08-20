@@ -1,22 +1,17 @@
 package org.example.pokedex.presentation.home
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import org.example.pokedex.domain.repository.PokemonDataSource
-import org.koin.compose.koinInject
+import androidx.compose.runtime.getValue
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import org.example.pokedex.presentation.home.components.HomeContent
 
 @Composable
 fun HomeScreen(component: HomeComponent) {
-    val pokemonDataSource = koinInject<PokemonDataSource>()
 
-    LaunchedEffect(Unit) {
-        pokemonDataSource.getPokemonList(0,0)
-    }
-    Column {
-        Text("Home Screen")
-        Text("Home Screen")
-        Text("Home Screen")
-    }
+    val state by component.state.subscribeAsState()
+
+    HomeContent(
+        state = state,
+        onEvent = component::handleIntent
+    )
 }

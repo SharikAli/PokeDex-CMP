@@ -1,14 +1,25 @@
 package org.example.pokedex.presentation.pokedex
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import org.example.pokedex.presentation.pokedex.components.PokeDexContent
 
 @Composable
 fun PokeDexScreen(component: PokeDexComponent) {
-    Column {
-        Text("PokeDex Screen")
-        Text("PokeDex Screen")
-        Text("PokeDex Screen")
+
+    val state by component.state.subscribeAsState()
+
+    LaunchedEffect(Unit) {
+        component.handleIntent(PokeDexIntent.LoadPokemon(0))
     }
+
+    PokeDexContent(
+        state = state,
+        onEvent = component::handleIntent
+    )
 }
+
+
+
