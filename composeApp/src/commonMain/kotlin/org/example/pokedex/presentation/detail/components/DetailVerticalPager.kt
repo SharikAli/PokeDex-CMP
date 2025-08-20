@@ -45,14 +45,25 @@ fun DetailVerticalPager(
     val hasItems = state.pokemonList.isNotEmpty()
     val totalPages = if (hasItems) state.pokemonList.size else 0
 
+    val currentIndex = remember(state.pokemonList, state.pokemon) {
+        state.pokemonList.indexOfFirst { it.id == state.pokemon.id }
+    }
+
     val pagerState = rememberPagerState(
-        initialPage = (state.pokemon.id.toInt()).minus(1),
-        pageCount = { totalPages },
+        initialPage = if (currentIndex >= 0) currentIndex else 0,
+        pageCount = { totalPages }
     )
+
+    LaunchedEffect(state.pokemonList, state.pokemon) {
+        val index = state.pokemonList.indexOfFirst { it.id == state.pokemon.id }
+        if (index >= 0 && pagerState.currentPage != index) {
+            pagerState.scrollToPage(index)
+        }
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage == state.pokemonList.size.minus(1) && !state.isLoading && state.loadMoreItem) {
-            onEvent(DetailIntent.LoadPokemonItems(state.pokemonList[pagerState.currentPage].page))
+            onEvent(DetailIntent.LoadPokemon(state.pokemonList[pagerState.currentPage].page))
         }
     }
 

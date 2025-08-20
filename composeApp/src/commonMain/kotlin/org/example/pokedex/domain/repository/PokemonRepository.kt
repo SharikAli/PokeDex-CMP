@@ -10,4 +10,6 @@ interface PokemonRepository {
     suspend fun getPokemonList(page: Long): Flow<Result<List<SinglePokemon>>>
     suspend fun fetchPokemonListByGeneration(id: Long): Flow<Result<GenerationInfo>>
     suspend fun fetchEvolutionList(page: Long): Flow<Result<List<Evolution>>>
+    suspend fun fetchLegendaryPokemonList(page: Long): Flow<Result<List<SinglePokemon>>>
+    suspend fun fetchMegaPokemonList(page: Long): Flow<Result<List<SinglePokemon>>>
 }

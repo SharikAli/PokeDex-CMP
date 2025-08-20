@@ -12,7 +12,7 @@ fun DetailScreen(component: DetailComponent) {
     val state by component.state.subscribeAsState()
 
     LaunchedEffect(Unit) {
-        component.handleIntent(DetailIntent.LoadPokemonItems(0))
+        component.handleIntent(DetailIntent.LoadPokemon(0))
     }
 
     DetailContent(

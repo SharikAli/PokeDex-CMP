@@ -15,12 +15,12 @@ data class StatsResponse(
     )
 
     companion object {
-        const val MAX_HP = 255
-        const val MAX_ATTACK = 190
-        const val MAX_DEFENSE = 230
-        const val MAX_SP_ATTACK = 200
-        const val MAX_SP_DEFENSE = 230
-        const val MAX_SPEED = 180
+        const val MAX_HP = 250
+        const val MAX_ATTACK = 250
+        const val MAX_DEFENSE = 250
+        const val MAX_SP_ATTACK = 250
+        const val MAX_SP_DEFENSE = 250
+        const val MAX_SPEED = 250
     }
 
     val maxValue: Int = when (stat.name) {

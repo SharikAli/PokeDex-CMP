@@ -8,4 +8,5 @@ data class PokeDexState(
     val errorMessage: String? = null,
     val loadMoreItem: Boolean = false,
     val isInitialPageLoading: Boolean = true,
+    val showMegaEvolvePokeDex: Boolean = false,
 )

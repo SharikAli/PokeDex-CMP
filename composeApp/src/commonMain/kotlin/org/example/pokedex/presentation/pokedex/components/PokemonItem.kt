@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
@@ -31,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -46,11 +46,22 @@ import org.example.pokedex.presentation.theme.RoundedCornerLarge
 fun PokemonItem(
     modifier: Modifier = Modifier,
     pokemon: SinglePokemon,
+    megaPokeDex: Boolean = false,
     onClick: () -> Unit,
 ) {
     val context = LocalPlatformContext.current
     var isLoading by remember { mutableStateOf(false) }
     val brush = remember { getPokemonBackgroundColor(pokemon) }
+    val pokemonName = remember {
+        if (megaPokeDex) {
+            pokemon.name
+                .split("-")
+                .reversed()
+                .joinToString(" ") { it.replaceFirstChar { value -> value.uppercase() } }
+        } else {
+            pokemon.name.replaceFirstChar { it.uppercase() }
+        }
+    }
 
     val request by remember {
         derivedStateOf {
@@ -80,13 +91,14 @@ fun PokemonItem(
             ) {
                 Column(
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxHeight().weight(1.3f)
+                    modifier = Modifier.fillMaxHeight().weight(1f)
                 ) {
 
                     Text(
-                        text = pokemon.name.replaceFirstChar { it.uppercase() },
+                        text = pokemonName,
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(fontSize = 14.sp),
+                        overflow = TextOverflow.Ellipsis,
                         color = Color.White
                     )
 
@@ -144,8 +156,7 @@ fun PokemonItem(
                     AsyncImage(
                         modifier = Modifier
                             .aspectRatio(1f)
-                            .align(Alignment.End)
-                            .offset(x = 10.dp, y = 10.dp),
+                            .align(Alignment.End),
                         model = request,
                         contentDescription = pokemon.name,
                         contentScale = ContentScale.Fit,

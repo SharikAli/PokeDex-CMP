@@ -39,7 +39,7 @@ fun PokeDexGridContent(
             .distinctUntilChanged()
             .collectLatest { isAtEnd ->
                 if (isAtEnd && !state.isLoading && state.loadMoreItem) {
-                    onEvent(PokeDexIntent.LoadPokemonItems(state.pokemonList.last().page))
+                    onEvent(PokeDexIntent.LoadPokemon(state.pokemonList.last().page))
                 }
             }
     }
@@ -54,6 +54,7 @@ fun PokeDexGridContent(
         items(state.pokemonList, key = { item -> item.name }) { pokemon ->
             PokemonItem(
                 pokemon = pokemon,
+                megaPokeDex = state.showMegaEvolvePokeDex,
                 onClick = { onEvent(PokeDexIntent.NavigateToPokemonDetails(pokemon)) }
             )
         }

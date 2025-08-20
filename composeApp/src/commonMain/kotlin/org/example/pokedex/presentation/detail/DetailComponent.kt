@@ -16,22 +16,37 @@ class DetailComponent(
     pokemon: SinglePokemon,
     private val useCase: PokemonUseCase,
     private val onBack: () -> Unit,
+    private val showMegaEvolvePokeDex: Boolean,
+    private val showLegendaryPokeDex: Boolean,
 ) : ComponentContext by componentContext {
 
     private val scope = coroutineScope()
 
-    private val detailState =
-        DetailState(pokemon = pokemon, brush = getPokemonBackgroundColor(pokemon))
+    private val detailState = DetailState(
+        pokemon = pokemon,
+        brush = getPokemonBackgroundColor(pokemon),
+        showMegaEvolvePokeDexDetail = showMegaEvolvePokeDex
+    )
 
     private val _state: MutableValue<DetailState> = MutableValue(detailState)
     val state: Value<DetailState> = _state
 
     fun handleIntent(intent: DetailIntent) {
         when (intent) {
-            is DetailIntent.LoadPokemonItems -> loadMoreItems(intent.page)
+            is DetailIntent.LoadPokemon -> handlePokemonListFetching(intent.page)
             DetailIntent.HideAlertDialog -> hideAlertDialog()
             DetailIntent.NavigateBack -> onBack()
             is DetailIntent.PageChanged -> onPageChanged(intent.pokemon)
+        }
+    }
+
+    private fun handlePokemonListFetching(page: Long) {
+        if (showLegendaryPokeDex) {
+            loadLegendaryPokemonItems(page)
+        } else if (showMegaEvolvePokeDex) {
+            loadMegaPokemon(page)
+        } else {
+            loadMoreItems(page)
         }
     }
 
@@ -57,6 +72,78 @@ class DetailComponent(
                             val combined = (state.pokemonList + result.data)
                                 .distinctBy { it.name }
                                 .sortedBy { it.numberString }
+                            state.copy(
+                                isLoading = false,
+                                pokemonList = combined,
+                                loadMoreItem = result.data.isNotEmpty(),
+                                errorMessage = null,
+                                isInitialPageLoading = false,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadLegendaryPokemonItems(page: Long) {
+        scope.launch {
+            var nextPage = 0L
+            if (!_state.value.isInitialPageLoading) {
+                nextPage = page.plus(1)
+            }
+
+            useCase.getLegendaryPokemon(nextPage).collect { result ->
+                when (result) {
+                    Result.Loading -> _state.update { it.copy(isLoading = true) }
+                    is Result.Error -> _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = result.errorMessage
+                        )
+                    }
+
+                    is Result.Success -> {
+                        _state.update { state ->
+                            val combined = (state.pokemonList + result.data)
+                                .distinctBy { it.id }
+                                .sortedBy { it.id }
+                            state.copy(
+                                isLoading = false,
+                                pokemonList = combined,
+                                loadMoreItem = result.data.isNotEmpty(),
+                                errorMessage = null,
+                                isInitialPageLoading = false,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadMegaPokemon(page: Long) {
+        scope.launch {
+            var nextPage = 5L
+            if (!_state.value.isInitialPageLoading) {
+                nextPage = page.plus(1)
+            }
+
+            useCase.getMegaPokemon(nextPage).collect { result ->
+                when (result) {
+                    Result.Loading -> _state.update { it.copy(isLoading = true) }
+                    is Result.Error -> _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = result.errorMessage
+                        )
+                    }
+
+                    is Result.Success -> {
+                        _state.update { state ->
+                            val combined = (state.pokemonList + result.data)
+                                .distinctBy { it.id }
+                                .sortedBy { it.id }
                             state.copy(
                                 isLoading = false,
                                 pokemonList = combined,

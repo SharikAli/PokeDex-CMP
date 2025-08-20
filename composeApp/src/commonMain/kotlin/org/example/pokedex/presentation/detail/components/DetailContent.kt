@@ -50,7 +50,7 @@ fun DetailContent(
                         .fillMaxWidth()
                 ) {
 
-                    HeaderContent(pokemon = state.pokemon)
+                    HeaderContent(pokemon = state.pokemon, state.showMegaEvolvePokeDexDetail)
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -84,7 +84,10 @@ fun DetailContent(
                     )
 
                     Column {
-                        HeaderContent(pokemon = state.pokemon)
+                        HeaderContent(
+                            pokemon = state.pokemon,
+                            showMegaEvolvePokeDexDetail = state.showMegaEvolvePokeDexDetail
+                        )
 
                         PokemonWeightAndHeight(
                             modifier = Modifier.padding(20.dp),

@@ -6,5 +6,5 @@ sealed interface DetailIntent {
     data object NavigateBack : DetailIntent
     data object HideAlertDialog : DetailIntent
     data class PageChanged(val pokemon: SinglePokemon) : DetailIntent
-    data class LoadPokemonItems(val page: Long): DetailIntent
+    data class LoadPokemon(val page: Long): DetailIntent
 }

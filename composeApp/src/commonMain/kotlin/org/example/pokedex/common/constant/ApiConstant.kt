@@ -1,7 +1,7 @@
 package org.example.pokedex.common.constant
 
 object ApiConstant {
-    const val BASE_URL = "https://pokeapi.co/api/v2/"
+    private const val BASE_URL = "https://pokeapi.co/api/v2/"
     const val PAGE_SIZE = 20
 
     const val POKEMON = BASE_URL + "pokemon"

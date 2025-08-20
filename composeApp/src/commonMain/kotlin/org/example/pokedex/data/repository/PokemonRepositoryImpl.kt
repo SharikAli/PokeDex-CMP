@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import org.example.pokedex.common.Result
+import org.example.pokedex.common.getLegendaryPokemonData
+import org.example.pokedex.common.getMegaPokemonData
+import org.example.pokedex.common.mapToLegendaryPokemonEntity
 import org.example.pokedex.common.mapToPokemonEntity
 import org.example.pokedex.common.toEvolution
 import org.example.pokedex.common.toGenerationEntity
@@ -118,7 +121,8 @@ class PokemonRepositoryImpl(
                             )
 
                             val evolveChain =
-                                localEvolutionDataSource.selectById(evolution.id.toLong())?.toEvolution()
+                                localEvolutionDataSource.selectById(evolution.id.toLong())
+                                    ?.toEvolution()
 
                             evolveChain?.let {
                                 currentList.add(it)
@@ -134,4 +138,107 @@ class PokemonRepositoryImpl(
             }
 
         }
+
+    override suspend fun fetchLegendaryPokemonList(page: Long): Flow<Result<List<SinglePokemon>>> =
+        channelFlow {
+            send(Result.Loading)
+
+            val cachedPokemonList = localDataSource.selectAllLegendaryByPage(page)
+            if (cachedPokemonList.isNotEmpty()) {
+                delay(1000)
+                send(Result.Success(cachedPokemonList.map { it.toSinglePokemon() }))
+                return@channelFlow
+            }
+
+            try {
+                val pokemonNames = getLegendaryPokemonData(page)
+                val currentList = mutableListOf<SinglePokemon>()
+
+                if (pokemonNames.isEmpty()) {
+                    send(Result.Success(emptyList()))
+                    return@channelFlow
+                }
+
+                pokemonNames.forEach { pokemon ->
+                    launch(Dispatchers.IO) {
+                        try {
+                            val pokemonInfo = remoteDataSource.getPokemonByName(pokemon.name)
+
+                            localDataSource.insertLegendaryPokemon(
+                                mapToLegendaryPokemonEntity(
+                                    pokemonInfo,
+                                    page
+                                )
+                            )
+
+                            val updatedPokemon =
+                                localDataSource.selectLegendaryByName(pokemonInfo.id)
+                                    ?.toSinglePokemon()
+
+                            updatedPokemon?.let {
+                                currentList.add(it)
+                                send(Result.Success(currentList.toList()))
+                            }
+                        } catch (e: Exception) {
+                            send(Result.Error(e.message.toString()))
+                        }
+                    }
+
+                }
+            } catch (e: Exception) {
+                send(Result.Error(e.message.toString()))
+            }
+        }
+
+    override suspend fun fetchMegaPokemonList(page: Long): Flow<Result<List<SinglePokemon>>> =
+        channelFlow {
+            send(Result.Loading)
+
+            val cachedPokemonList = localDataSource.selectAllLegendaryByPage(page)
+            if (cachedPokemonList.isNotEmpty()) {
+                delay(1000)
+                send(Result.Success(cachedPokemonList.map { it.toSinglePokemon() }))
+                return@channelFlow
+            }
+
+            try {
+                val pokemonNames = getMegaPokemonData(page)
+                val currentList = mutableListOf<SinglePokemon>()
+
+                if (pokemonNames.isEmpty()) {
+                    send(Result.Success(emptyList()))
+                    return@channelFlow
+                }
+
+                pokemonNames.forEach { pokemon ->
+                    launch(Dispatchers.IO) {
+                        try {
+                            val pokemonInfo = remoteDataSource.getPokemonByName(pokemon.name)
+
+                            localDataSource.insertLegendaryPokemon(
+                                mapToLegendaryPokemonEntity(
+                                    pokemonInfo,
+                                    page
+                                )
+                            )
+
+                            val updatedPokemon =
+                                localDataSource.selectLegendaryByName(pokemonInfo.id)
+                                    ?.toSinglePokemon()
+
+                            updatedPokemon?.let {
+                                currentList.add(it)
+                                send(Result.Success(currentList.toList()))
+                            }
+                        } catch (e: Exception) {
+                            send(Result.Error(e.message.toString()))
+                        }
+                    }
+
+                }
+            } catch (e: Exception) {
+                send(Result.Error(e.message.toString()))
+            }
+        }
 }
+

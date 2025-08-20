@@ -11,4 +11,12 @@ class PokemonUseCase(
     suspend operator fun invoke(page: Long): Flow<Result<List<SinglePokemon>>> {
         return pokemonRepository.getPokemonList(page = page)
     }
+
+    suspend fun getLegendaryPokemon(page: Long): Flow<Result<List<SinglePokemon>>> {
+        return pokemonRepository.fetchLegendaryPokemonList(page = page)
+    }
+
+    suspend fun getMegaPokemon(page: Long): Flow<Result<List<SinglePokemon>>> {
+        return pokemonRepository.fetchMegaPokemonList(page = page)
+    }
 }

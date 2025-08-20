@@ -10,5 +10,6 @@ data class DetailState(
     val errorMessage: String? = null,
     val loadMoreItem: Boolean = false,
     val isInitialPageLoading: Boolean = true,
+    val showMegaEvolvePokeDexDetail: Boolean = false,
     val brush: Brush,
 )

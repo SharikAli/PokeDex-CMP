@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class HomeComponent(
     componentContext: ComponentContext,
-    private val onNavigateToPokeDex: () -> Unit,
+    private val onNavigateToPokeDex: (showLegendaryPokeDex: Boolean, showMegaEvolutionPokeDex: Boolean) -> Unit,
     private val onNavigateToGeneration: (String) -> Unit,
     private val onNavigateToEvolution: () -> Unit,
 ) : ComponentContext by componentContext {
@@ -21,14 +21,16 @@ class HomeComponent(
 
     fun handleIntent(intent: HomeIntent) {
         when (intent) {
-            HomeIntent.NavigateToPokeDex -> onNavigateToPokeDex()
+            HomeIntent.NavigateToPokeDex -> onNavigateToPokeDex(false, false)
+            HomeIntent.NavigateToLegendaryPokeDex -> onNavigateToPokeDex(true, false)
+            HomeIntent.NavigateToMegaPokeDex -> onNavigateToPokeDex(false, true)
             is HomeIntent.NavigateToGeneration -> {
                 showGenerationSheet(false)
                 onNavigateToGeneration(intent.id)
             }
 
             HomeIntent.NavigateToEvolution -> onNavigateToEvolution()
-            HomeIntent.NavigateToLocation -> TODO()
+            HomeIntent.NavigateToLocation -> {}
             is HomeIntent.ShowGenerationSheet -> showGenerationSheet(intent.visible)
         }
     }

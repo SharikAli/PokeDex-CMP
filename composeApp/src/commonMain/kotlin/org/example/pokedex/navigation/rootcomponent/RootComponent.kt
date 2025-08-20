@@ -46,11 +46,22 @@ class DefaultRootComponent(
         componentContext: ComponentContext
     ): Child {
         return when (config) {
-            is Config.Detail -> createDetail(componentContext, config.pokemon)
+            is Config.Detail -> createDetail(
+                componentContext,
+                config.pokemon,
+                config.showLegendaryPokeDex,
+                config.showMegaEvolvePokeDex
+            )
+
+            is Config.PokeDex -> createPokeDex(
+                componentContext,
+                config.showLegendaryPokeDex,
+                config.showMegaEvolvePokeDex
+            )
+
+            is Config.Generation -> createGeneration(componentContext, config.id)
             Config.Evolution -> createEvolution(componentContext)
             Config.Home -> createHome(componentContext)
-            Config.PokeDex -> createPokeDex(componentContext)
-            is Config.Generation -> createGeneration(componentContext, config.id)
         }
     }
 
@@ -58,19 +69,40 @@ class DefaultRootComponent(
         return Child.HomeScreen(
             component = HomeComponent(
                 componentContext = context,
-                onNavigateToPokeDex = { navigation.pushNew(Config.PokeDex) },
+                onNavigateToPokeDex = { showLegendaryPokeDex, showMegaEvolvePokeDex ->
+                    navigation.pushNew(
+                        Config.PokeDex(
+                            showLegendaryPokeDex = showLegendaryPokeDex,
+                            showMegaEvolvePokeDex = showMegaEvolvePokeDex
+                        )
+                    )
+                },
                 onNavigateToGeneration = { navigation.pushNew(Config.Generation(it)) },
                 onNavigateToEvolution = { navigation.pushNew(Config.Evolution) }
             )
         )
     }
 
-    private fun createPokeDex(context: ComponentContext): Child.PokeDexScreen {
+    private fun createPokeDex(
+        context: ComponentContext,
+        showLegendaryPokeDex: Boolean,
+        showMegaEvolvePokeDex: Boolean
+    ): Child.PokeDexScreen {
         return Child.PokeDexScreen(
             component = PokeDexComponent(
                 componentContext = context,
                 useCase = pokemonUseCase,
-                navigateToDetails = { navigation.pushNew(Config.Detail(it)) },
+                showLegendaryPokeDex = showLegendaryPokeDex,
+                showMegaEvolvePokeDex = showMegaEvolvePokeDex,
+                navigateToDetails = { pokemon, legendaryPokeDex, megaEvolvePokeDex ->
+                    navigation.pushNew(
+                        Config.Detail(
+                            pokemon,
+                            legendaryPokeDex,
+                            megaEvolvePokeDex
+                        )
+                    )
+                },
                 onBack = { navigation.pop() }
             )
         )
@@ -78,12 +110,16 @@ class DefaultRootComponent(
 
     private fun createDetail(
         context: ComponentContext,
-        pokemon: SinglePokemon
+        pokemon: SinglePokemon,
+        showLegendaryPokeDex: Boolean,
+        showMegaEvolvePokeDex: Boolean
     ): Child.DetailScreen {
         return Child.DetailScreen(
             component = DetailComponent(
                 componentContext = context,
                 pokemon = pokemon,
+                showLegendaryPokeDex = showLegendaryPokeDex,
+                showMegaEvolvePokeDex = showMegaEvolvePokeDex,
                 useCase = pokemonUseCase,
                 onBack = { navigation.pop() }
             )

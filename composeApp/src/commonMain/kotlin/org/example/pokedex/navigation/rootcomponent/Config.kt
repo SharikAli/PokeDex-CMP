@@ -9,10 +9,17 @@ sealed interface Config {
     data object Home : Config
 
     @Serializable
-    data object PokeDex : Config
+    data class PokeDex(
+        val showLegendaryPokeDex: Boolean,
+        val showMegaEvolvePokeDex: Boolean
+    ) : Config
 
     @Serializable
-    data class Detail(val pokemon: SinglePokemon) : Config
+    data class Detail(
+        val pokemon: SinglePokemon,
+        val showLegendaryPokeDex: Boolean,
+        val showMegaEvolvePokeDex: Boolean
+    ) : Config
 
     @Serializable
     data object Evolution : Config
