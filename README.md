@@ -16,8 +16,6 @@
 
 
 ### Desktop
-<img src="screenshot/home/desktop-home.png" alt="desktop-home" height="400" width="450"/>&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="screenshot/pokedex/desktop-pokedex.png" alt="desktop-pokedex" height="400" width="450"/>&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="screenshot/pokedex-detail/desktop-pok-detail.png" alt="desktop-pok-detail" height="400" width="500"/>&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="screenshot/evolution/desktop-evolution.png" alt="desktop-evolution" height="400" width="450"/>&nbsp;&nbsp;&nbsp;&nbsp;
-<img src="screenshot/generation/desktop-generation.png" alt="desktop-generation" height="400" width="450"/>
+<img src="screenshot/home/desktop-home.png" alt="desktop-home" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex/desktop-pokedex.png" alt="desktop-pokedex" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex-detail/desktop-pok-detail.png" alt="desktop-pok-detail" height="400">&nbsp;&nbsp;&nbsp;&nbsp;
