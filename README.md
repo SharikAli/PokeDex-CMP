@@ -1,14 +1,21 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop.
-
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
-
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## App Screenshot 📷:  
+### Android
+<img src="screenshot/home/android-home.png" alt="android-home" height="400" />&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex/android-pokedex.png" alt="android-pokedex" height="400" />&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex-detail/android-pok-detaiil.png" alt="android-pok-detail" height="400" />&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/evolution/android-evolution.png" alt="android-evolution" height="400" />&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/generation/android-generation.png" alt="android-generation" height="400" />&nbsp;&nbsp;&nbsp;&nbsp;
 
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+### IOS
+<img src="screenshot/home/ios-home.png" alt="ios-home" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex/ios-pokedex.png" alt="ios-pokedex" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex-detail/ios-pok-detail.png" alt="ios-pok-detail" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/evolution/ios-evolution.png" alt="ios-evolution" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/generation/ios-generation.png" alt="ios-generation" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+### Desktop
+<img src="screenshot/home/desktop-home.png" alt="desktop-home" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex/desktop-pokedex.png" alt="desktop-pokedex" height="400"/>&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="screenshot/pokedex-detail/desktop-pok-detail.png" alt="desktop-pok-detail" height="400">&nbsp;&nbsp;&nbsp;&nbsp;
