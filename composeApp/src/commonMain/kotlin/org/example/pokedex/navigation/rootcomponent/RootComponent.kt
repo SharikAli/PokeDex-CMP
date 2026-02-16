@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.value.Value
+import org.example.pokedex.domain.model.PokedexType
 import org.example.pokedex.domain.model.SinglePokemon
 import org.example.pokedex.domain.usecase.EvolutionUseCase
 import org.example.pokedex.domain.usecase.PokemonGenerationUseCase
@@ -49,14 +50,12 @@ class DefaultRootComponent(
             is Config.Detail -> createDetail(
                 componentContext,
                 config.pokemon,
-                config.showLegendaryPokeDex,
-                config.showMegaEvolvePokeDex
+                config.type,
             )
 
             is Config.PokeDex -> createPokeDex(
                 componentContext,
-                config.showLegendaryPokeDex,
-                config.showMegaEvolvePokeDex
+                config.type
             )
 
             is Config.Generation -> createGeneration(componentContext, config.id)
@@ -69,12 +68,9 @@ class DefaultRootComponent(
         return Child.HomeScreen(
             component = HomeComponent(
                 componentContext = context,
-                onNavigateToPokeDex = { showLegendaryPokeDex, showMegaEvolvePokeDex ->
+                onNavigateToPokeDex = { type ->
                     navigation.pushNew(
-                        Config.PokeDex(
-                            showLegendaryPokeDex = showLegendaryPokeDex,
-                            showMegaEvolvePokeDex = showMegaEvolvePokeDex
-                        )
+                        Config.PokeDex(type)
                     )
                 },
                 onNavigateToGeneration = { navigation.pushNew(Config.Generation(it)) },
@@ -85,21 +81,18 @@ class DefaultRootComponent(
 
     private fun createPokeDex(
         context: ComponentContext,
-        showLegendaryPokeDex: Boolean,
-        showMegaEvolvePokeDex: Boolean
+        type: PokedexType
     ): Child.PokeDexScreen {
         return Child.PokeDexScreen(
             component = PokeDexComponent(
                 componentContext = context,
                 useCase = pokemonUseCase,
-                showLegendaryPokeDex = showLegendaryPokeDex,
-                showMegaEvolvePokeDex = showMegaEvolvePokeDex,
-                navigateToDetails = { pokemon, legendaryPokeDex, megaEvolvePokeDex ->
+                pokedexType = type,
+                navigateToDetails = { pokemon ->
                     navigation.pushNew(
                         Config.Detail(
                             pokemon,
-                            legendaryPokeDex,
-                            megaEvolvePokeDex
+                            type
                         )
                     )
                 },
@@ -111,16 +104,14 @@ class DefaultRootComponent(
     private fun createDetail(
         context: ComponentContext,
         pokemon: SinglePokemon,
-        showLegendaryPokeDex: Boolean,
-        showMegaEvolvePokeDex: Boolean
+        type: PokedexType
     ): Child.DetailScreen {
         return Child.DetailScreen(
             component = DetailComponent(
                 componentContext = context,
                 pokemon = pokemon,
-                showLegendaryPokeDex = showLegendaryPokeDex,
-                showMegaEvolvePokeDex = showMegaEvolvePokeDex,
                 useCase = pokemonUseCase,
+                pokedexType = type,
                 onBack = { navigation.pop() }
             )
         )
