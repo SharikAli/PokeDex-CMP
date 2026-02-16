@@ -1,6 +1,7 @@
 package org.example.pokedex.navigation.rootcomponent
 
 import kotlinx.serialization.Serializable
+import org.example.pokedex.domain.model.PokedexType
 import org.example.pokedex.domain.model.SinglePokemon
 
 @Serializable
@@ -10,15 +11,13 @@ sealed interface Config {
 
     @Serializable
     data class PokeDex(
-        val showLegendaryPokeDex: Boolean,
-        val showMegaEvolvePokeDex: Boolean
+        val type: PokedexType
     ) : Config
 
     @Serializable
     data class Detail(
         val pokemon: SinglePokemon,
-        val showLegendaryPokeDex: Boolean,
-        val showMegaEvolvePokeDex: Boolean
+        val type: PokedexType
     ) : Config
 
     @Serializable

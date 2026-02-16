@@ -2,7 +2,6 @@ package org.example.pokedex.data.remote.datasource
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import kotlinx.coroutines.delay
 import org.example.pokedex.common.constant.ApiConstant
 import org.example.pokedex.common.constant.ApiConstant.PAGE_SIZE
 import org.example.pokedex.common.safeApiCall
@@ -25,7 +24,6 @@ class PokemonApiImpl(
 ) : PokemonApi {
 
     override suspend fun getPokemonList(page: Long): PokemonResponse {
-        delay(1000) // simulate network delay
         return safeApiCall {
             httpClient.get(ApiConstant.POKEMON) {
                 url {
@@ -37,21 +35,18 @@ class PokemonApiImpl(
     }
 
     override suspend fun getPokemonByName(name: String): PokemonInfo {
-        delay(1000) // simulate network delay
         return safeApiCall {
             httpClient.get("${ApiConstant.POKEMON}/$name")
         }
     }
 
     override suspend fun getPokemonByGeneration(id: Long): GenerationInfo {
-        delay(1000)
         return safeApiCall {
             httpClient.get("${ApiConstant.POKEMON_GENERATION}/$id")
         }
     }
 
     override suspend fun getEvolutionChain(page: Long): EvolutionChainResponse {
-        delay(1000)
         return safeApiCall {
             httpClient.get(ApiConstant.POKEMON_EVOLUTION_CHAIN) {
                 url {
@@ -63,7 +58,6 @@ class PokemonApiImpl(
     }
 
     override suspend fun getPokemonEvolutionById(id: Long): EvolutionResponse {
-        delay(1000)
         return safeApiCall {
             httpClient.get("${ApiConstant.POKEMON_EVOLUTION_CHAIN}/$id")
         }
