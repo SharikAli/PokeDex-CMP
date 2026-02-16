@@ -8,6 +8,7 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.example.pokedex.common.Result
 import org.example.pokedex.common.getPokemonBackgroundColor
+import org.example.pokedex.domain.model.PokedexType
 import org.example.pokedex.domain.model.SinglePokemon
 import org.example.pokedex.domain.usecase.PokemonUseCase
 
@@ -15,160 +16,81 @@ class DetailComponent(
     componentContext: ComponentContext,
     pokemon: SinglePokemon,
     private val useCase: PokemonUseCase,
+    private val pokedexType: PokedexType,
     private val onBack: () -> Unit,
-    private val showMegaEvolvePokeDex: Boolean,
-    private val showLegendaryPokeDex: Boolean,
 ) : ComponentContext by componentContext {
 
     private val scope = coroutineScope()
 
-    private val detailState = DetailState(
-        pokemon = pokemon,
-        brush = getPokemonBackgroundColor(pokemon),
-        showMegaEvolvePokeDexDetail = showMegaEvolvePokeDex
+    private val _state = MutableValue(
+        DetailState(
+            pokemon = pokemon,
+            brush = getPokemonBackgroundColor(pokemon)
+        )
     )
 
-    private val _state: MutableValue<DetailState> = MutableValue(detailState)
     val state: Value<DetailState> = _state
 
     fun handleIntent(intent: DetailIntent) {
         when (intent) {
-            is DetailIntent.LoadPokemon -> handlePokemonListFetching(intent.page)
-            DetailIntent.HideAlertDialog -> hideAlertDialog()
+            is DetailIntent.LoadPokemon -> loadPokemon(intent.page)
             DetailIntent.NavigateBack -> onBack()
-            is DetailIntent.PageChanged -> onPageChanged(intent.pokemon)
+            DetailIntent.HideAlertDialog ->
+                _state.update { it.copy(errorMessage = null) }
+
+            is DetailIntent.PageChanged ->
+                updateCurrentPokemon(intent.pokemon)
         }
     }
 
-    private fun handlePokemonListFetching(page: Long) {
-        if (showLegendaryPokeDex) {
-            loadLegendaryPokemonItems(page)
-        } else if (showMegaEvolvePokeDex) {
-            loadMegaPokemon(page)
-        } else {
-            loadMoreItems(page)
-        }
-    }
+    private fun loadPokemon(page: Long) {
 
-    private fun loadMoreItems(page: Long) {
         scope.launch {
-            var nextPage = 0L
-            if (!_state.value.isInitialPageLoading) {
-                nextPage = page.plus(1)
-            }
 
-            useCase(nextPage).collect { result ->
-                when (result) {
-                    Result.Loading -> _state.update { it.copy(isLoading = true) }
-                    is Result.Error -> _state.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = result.errorMessage
-                        )
-                    }
+            val nextPage =
+                if (_state.value.isInitialPageLoading) 0L
+                else page + 1
 
-                    is Result.Success -> {
-                        _state.update { state ->
-                            val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.name }
-                                .sortedBy { it.numberString }
-                            state.copy(
-                                isLoading = false,
-                                pokemonList = combined,
-                                loadMoreItem = result.data.isNotEmpty(),
-                                errorMessage = null,
-                                isInitialPageLoading = false,
-                            )
-                        }
+            useCase(pokedexType, nextPage)
+                .collect { result ->
+
+                    when (result) {
+
+                        Result.Loading ->
+                            _state.update { it.copy(isLoading = true) }
+
+                        is Result.Error ->
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    errorMessage = result.errorMessage
+                                )
+                            }
+
+                        is Result.Success ->
+                            _state.update { state ->
+                                val combined =
+                                    (state.pokemonList + result.data)
+                                        .distinctBy { it.id }
+                                        .sortedBy { it.id }
+
+                                state.copy(
+                                    isLoading = false,
+                                    pokemonList = combined,
+                                    isInitialPageLoading = false
+                                )
+                            }
                     }
                 }
-            }
         }
     }
 
-    private fun loadLegendaryPokemonItems(page: Long) {
-        scope.launch {
-            var nextPage = 0L
-            if (!_state.value.isInitialPageLoading) {
-                nextPage = page.plus(1)
-            }
-
-            useCase.getLegendaryPokemon(nextPage).collect { result ->
-                when (result) {
-                    Result.Loading -> _state.update { it.copy(isLoading = true) }
-                    is Result.Error -> _state.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = result.errorMessage
-                        )
-                    }
-
-                    is Result.Success -> {
-                        _state.update { state ->
-                            val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.id }
-                                .sortedBy { it.id }
-                            state.copy(
-                                isLoading = false,
-                                pokemonList = combined,
-                                loadMoreItem = result.data.isNotEmpty(),
-                                errorMessage = null,
-                                isInitialPageLoading = false,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun loadMegaPokemon(page: Long) {
-        scope.launch {
-            var nextPage = 5L
-            if (!_state.value.isInitialPageLoading) {
-                nextPage = page.plus(1)
-            }
-
-            useCase.getMegaPokemon(nextPage).collect { result ->
-                when (result) {
-                    Result.Loading -> _state.update { it.copy(isLoading = true) }
-                    is Result.Error -> _state.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = result.errorMessage
-                        )
-                    }
-
-                    is Result.Success -> {
-                        _state.update { state ->
-                            val combined = (state.pokemonList + result.data)
-                                .distinctBy { it.id }
-                                .sortedBy { it.id }
-                            state.copy(
-                                isLoading = false,
-                                pokemonList = combined,
-                                loadMoreItem = result.data.isNotEmpty(),
-                                errorMessage = null,
-                                isInitialPageLoading = false,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun hideAlertDialog() {
-        scope.launch {
-            _state.update { it.copy(errorMessage = null) }
-        }
-    }
-
-    private fun onPageChanged(pokemon: SinglePokemon) {
-        scope.launch {
-            _state.update {
-                it.copy(pokemon = pokemon, brush = getPokemonBackgroundColor(pokemon))
-            }
+    private fun updateCurrentPokemon(pokemon: SinglePokemon) {
+        _state.update {
+            it.copy(
+                pokemon = pokemon,
+                brush = getPokemonBackgroundColor(pokemon)
+            )
         }
     }
 }

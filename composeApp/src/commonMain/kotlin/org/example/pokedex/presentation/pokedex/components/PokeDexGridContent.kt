@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import org.example.pokedex.domain.model.PokedexType
 import org.example.pokedex.presentation.components.LoadingOverlay
 import org.example.pokedex.presentation.pokedex.PokeDexIntent
 import org.example.pokedex.presentation.pokedex.PokeDexState
@@ -38,7 +39,7 @@ fun PokeDexGridContent(
             }
             .distinctUntilChanged()
             .collectLatest { isAtEnd ->
-                if (isAtEnd && !state.isLoading && state.loadMoreItem) {
+                if (isAtEnd && !state.isLoading && state.canLoadMore) {
                     onEvent(PokeDexIntent.LoadPokemon(state.pokemonList.last().page))
                 }
             }
@@ -54,7 +55,7 @@ fun PokeDexGridContent(
         items(state.pokemonList, key = { item -> item.name }) { pokemon ->
             PokemonItem(
                 pokemon = pokemon,
-                megaPokeDex = state.showMegaEvolvePokeDex,
+                megaPokeDex = state.pokedexType == PokedexType.MEGA,
                 onClick = { onEvent(PokeDexIntent.NavigateToPokemonDetails(pokemon)) }
             )
         }
